@@ -1,0 +1,19 @@
+{
+  "extends": "./tsconfig.app.json",
+  "compilerOptions": {
+    "noEmit": false,
+    "declaration": true,
+    "emitDeclarationOnly": true,
+    "declarationMap": true,
+    "outDir": "./dist",
+    "rootDir": "./src",
+    "tsBuildInfoFile": "./node_modules/.tmp/tsconfig.lib.tsbuildinfo"
+  },
+  "include": [
+    "src/vite.ts",
+    "src/lib/**/*.ts",
+    "src/client/**/*.ts",
+    "src/ui/**/*.ts",
+    "src/adapters/**/*.ts"
+  ]
+}
