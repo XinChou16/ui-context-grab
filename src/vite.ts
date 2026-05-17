@@ -1,8 +1,10 @@
 import { existsSync } from 'node:fs'
 import { dirname, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
-import type { Plugin } from 'vite'
+import Inspector from 'vite-plugin-vue-inspector'
+import type { Plugin, PluginOption } from 'vite'
 import { normalizePath } from 'vite'
+import type { VitePluginInspectorOptions } from 'vite-plugin-vue-inspector'
 
 const CURRENT_DIR = dirname(fileURLToPath(import.meta.url))
 const SOURCE_CLIENT_ENTRY = resolve(CURRENT_DIR, 'client/index.ts')
@@ -15,13 +17,31 @@ function getClientImportPath(): string {
 
 export interface UiContextGrabOptions {
   enabled?: boolean
+  vueInspector?: boolean | Partial<VitePluginInspectorOptions>
 }
 
-export function uiContextGrab(options: UiContextGrabOptions = {}): Plugin {
-  const enabled = options.enabled ?? true
+function createVueInspectorPlugin(
+  options: UiContextGrabOptions['vueInspector'],
+): PluginOption[] {
+  if (options === false) {
+    return []
+  }
 
+  return [
+    Inspector({
+      vue: 3,
+      enabled: false,
+      toggleButtonVisibility: 'never',
+      toggleComboKey: false,
+      cleanHtml: false,
+      ...(typeof options === 'object' ? options : {}),
+    }),
+  ]
+}
+
+function createUiContextGrabClientPlugin(enabled: boolean): Plugin {
   return {
-    name: 'ui-context-grab',
+    name: 'ui-context-grab:client',
     apply: 'serve',
     enforce: 'post',
     transformIndexHtml(html) {
@@ -45,7 +65,16 @@ export function uiContextGrab(options: UiContextGrabOptions = {}): Plugin {
   }
 }
 
-export function visualPrompt(options: UiContextGrabOptions = {}): Plugin {
+export function uiContextGrab(options: UiContextGrabOptions = {}): PluginOption[] {
+  const enabled = options.enabled ?? true
+
+  return [
+    ...createVueInspectorPlugin(options.vueInspector),
+    createUiContextGrabClientPlugin(enabled),
+  ]
+}
+
+export function visualPrompt(options: UiContextGrabOptions = {}): PluginOption[] {
   return uiContextGrab(options)
 }
 

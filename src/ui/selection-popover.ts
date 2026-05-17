@@ -48,6 +48,9 @@ export interface SelectionPopoverPayload {
   componentName: string | null
   componentStack: string[]
   file: string | null
+  lineNumber: number | null
+  columnNumber: number | null
+  sourceLocation: string | null
   selectorPath: string
   domPath: string
 }
@@ -68,6 +71,7 @@ function toCopyText(state: PopoverState): string {
     `componentName: ${state.payload.componentName ?? ''}`,
     `componentStack: ${state.payload.componentStack.join(' > ')}`,
     `file: ${state.payload.file ?? ''}`,
+    `sourceLocation: ${state.payload.sourceLocation ?? ''}`,
     `comment: ${state.comment}`,
     `selectorPath: ${state.payload.selectorPath}`,
     `domPath: ${state.payload.domPath}`,
@@ -128,6 +132,15 @@ export function createSelectionPopover(onCopySuccess?: () => void): SelectionPop
   fileRow.appendChild(fileLabel)
   fileRow.appendChild(fileValue)
 
+  const sourceLocationRow = document.createElement('div')
+  sourceLocationRow.style.cssText = ROW_STYLE
+  const sourceLocationLabel = document.createElement('span')
+  sourceLocationLabel.style.cssText = LABEL_STYLE
+  sourceLocationLabel.textContent = 'sourceLocation:'
+  const sourceLocationValue = document.createElement('span')
+  sourceLocationRow.appendChild(sourceLocationLabel)
+  sourceLocationRow.appendChild(sourceLocationValue)
+
   const stackRow = document.createElement('div')
   stackRow.style.cssText = ROW_STYLE
   const stackLabel = document.createElement('span')
@@ -172,13 +185,26 @@ export function createSelectionPopover(onCopySuccess?: () => void): SelectionPop
   copyButton.textContent = 'Copy'
   footer.appendChild(copyButton)
 
-  root.replaceChildren(title, componentRow, stackRow, fileRow, selectorRow, domPathRow, commentLabel, footer)
+  root.replaceChildren(
+    title,
+    componentRow,
+    stackRow,
+    fileRow,
+    sourceLocationRow,
+    selectorRow,
+    domPathRow,
+    commentLabel,
+    footer,
+  )
 
   let state: PopoverState = {
     payload: {
       componentName: null,
       componentStack: [],
       file: null,
+      lineNumber: null,
+      columnNumber: null,
+      sourceLocation: null,
       selectorPath: '',
       domPath: '',
     },
@@ -221,6 +247,7 @@ export function createSelectionPopover(onCopySuccess?: () => void): SelectionPop
       componentValue.textContent = payload.componentName ?? ''
       stackValue.textContent = payload.componentStack.join(' > ')
       fileValue.textContent = payload.file ?? ''
+      sourceLocationValue.textContent = payload.sourceLocation ?? ''
       selectorValue.textContent = payload.selectorPath
       domPathValue.textContent = payload.domPath
 

@@ -1,3 +1,6 @@
+import { vueResolver } from 'element-source'
+import type { ElementSourceInfo } from 'element-source'
+
 type UnknownRecord = Record<string, unknown>
 
 interface VueLikeInternalInstance {
@@ -23,8 +26,12 @@ interface Vue2LikeInstance {
 
 export interface VueComponentContext {
   file: string | null
+  lineNumber: number | null
+  columnNumber: number | null
+  sourceLocation: string | null
   componentName: string | null
   componentStack: string[]
+  sourceStack: ElementSourceInfo[]
   props: UnknownRecord | null
   setupState: UnknownRecord | null
 }
@@ -98,12 +105,84 @@ function pushStackName(stack: string[], name: string | null, filePath: string | 
   stack.push(displayName)
 }
 
+function createEmptyContext(): VueComponentContext {
+  return {
+    file: null,
+    lineNumber: null,
+    columnNumber: null,
+    sourceLocation: null,
+    componentName: null,
+    componentStack: [],
+    sourceStack: [],
+    props: null,
+    setupState: null,
+  }
+}
+
+function toSourceLocation(
+  filePath: string | null,
+  lineNumber: number | null,
+  columnNumber: number | null,
+): string | null {
+  if (!filePath) {
+    return null
+  }
+  if (lineNumber === null || columnNumber === null) {
+    return filePath
+  }
+  return `${filePath}:${lineNumber}:${columnNumber}`
+}
+
+function toSourceComponentStack(sourceStack: ElementSourceInfo[]): string[] {
+  const stack = sourceStack
+    .map((frame) => frame.componentName ?? basenameFromFile(frame.filePath))
+    .filter((name): name is string => Boolean(name))
+
+  return stack.length > 0 ? stack : []
+}
+
+function applySourceInfo(
+  context: VueComponentContext,
+  sourceStack: ElementSourceInfo[],
+): VueComponentContext {
+  const source = sourceStack[0] ?? null
+  const sourceComponentStack = toSourceComponentStack(sourceStack)
+
+  return {
+    ...context,
+    file: source?.filePath ?? context.file,
+    lineNumber: source?.lineNumber ?? null,
+    columnNumber: source?.columnNumber ?? null,
+    sourceLocation: toSourceLocation(
+      source?.filePath ?? context.file,
+      source?.lineNumber ?? null,
+      source?.columnNumber ?? null,
+    ),
+    componentName: source?.componentName ?? context.componentName,
+    componentStack:
+      sourceComponentStack.length > 0 ? sourceComponentStack : context.componentStack,
+    sourceStack,
+  }
+}
+
+async function getVueSourceStack(element: Element): Promise<ElementSourceInfo[]> {
+  try {
+    return await vueResolver.resolveStack(element)
+  } catch {
+    return []
+  }
+}
+
 function pickVue3Context(instance: VueLikeInternalInstance): VueComponentContext {
   let cursor: VueLikeInternalInstance | null | undefined = instance
   let fallback: VueComponentContext = {
     file: null,
+    lineNumber: null,
+    columnNumber: null,
+    sourceLocation: null,
     componentName: null,
     componentStack: [],
+    sourceStack: [],
     props: null,
     setupState: null,
   }
@@ -123,8 +202,12 @@ function pickVue3Context(instance: VueLikeInternalInstance): VueComponentContext
     if (file) {
       const candidate: VueComponentContext = {
         file,
+        lineNumber: null,
+        columnNumber: null,
+        sourceLocation: null,
         componentName,
         componentStack: [],
+        sourceStack: [],
         props: cursor.props ?? null,
         setupState: cursor.setupState ?? null,
       }
@@ -150,8 +233,12 @@ function pickVue2Context(instance: Vue2LikeInstance): VueComponentContext {
   let cursor: Vue2LikeInstance | null | undefined = instance
   let fallback: VueComponentContext = {
     file: null,
+    lineNumber: null,
+    columnNumber: null,
+    sourceLocation: null,
     componentName: null,
     componentStack: [],
+    sourceStack: [],
     props: null,
     setupState: null,
   }
@@ -171,8 +258,12 @@ function pickVue2Context(instance: Vue2LikeInstance): VueComponentContext {
     if (file) {
       const candidate: VueComponentContext = {
         file,
+        lineNumber: null,
+        columnNumber: null,
+        sourceLocation: null,
         componentName,
         componentStack: [],
+        sourceStack: [],
         props: cursor.$props ?? null,
         setupState: cursor._setupState ?? null,
       }
@@ -194,7 +285,7 @@ function pickVue2Context(instance: Vue2LikeInstance): VueComponentContext {
   return selected
 }
 
-export function getVueComponentContext(element: Element): VueComponentContext {
+function getFallbackVueComponentContext(element: Element): VueComponentContext {
   const vue3 = getVue3Instance(element)
   if (vue3) {
     return pickVue3Context(vue3)
@@ -205,11 +296,15 @@ export function getVueComponentContext(element: Element): VueComponentContext {
     return pickVue2Context(vue2)
   }
 
-  return {
-    file: null,
-    componentName: null,
-    componentStack: [],
-    props: null,
-    setupState: null,
+  return createEmptyContext()
+}
+
+export async function getVueComponentContext(element: Element): Promise<VueComponentContext> {
+  const fallback = getFallbackVueComponentContext(element)
+  const sourceStack = await getVueSourceStack(element)
+  if (sourceStack.length === 0) {
+    return fallback
   }
+
+  return applySourceInfo(fallback, sourceStack)
 }

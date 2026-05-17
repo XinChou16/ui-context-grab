@@ -29,9 +29,13 @@
 - 使用 `mouseenter` 做高亮，不依赖 `mousemove`。
 - 点击元素后收集上下文并输出日志。
 - 兼容 Vue 3 和 Vue 2 风格运行时信息。
+- Vue 3 开发环境下通过 `vite-plugin-vue-inspector` 和 `element-source` 展示组件行列信息。
 - 尝试优先返回用户代码对应的组件文件路径，避开 `node_modules`。
 - 采集项包括：
   - `file`
+  - `sourceLocation`
+  - `lineNumber`
+  - `columnNumber`
   - `componentName`
   - `componentStack`
   - `tag`
@@ -57,6 +61,9 @@
   componentName: "ExampleCard",
   componentStack: ["ExampleCard", "HomePage"],
   file: "/src/components/ExampleCard.vue",
+  sourceLocation: "/src/components/ExampleCard.vue:12:5",
+  lineNumber: 12,
+  columnNumber: 5,
   tag: "button",
   id: null,
   classList: ["btn", "btn-primary"],

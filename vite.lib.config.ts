@@ -18,7 +18,14 @@ export default defineConfig({
       },
     },
     rollupOptions: {
-      external: ['vite', 'node:fs', 'node:path', 'node:url'],
+      external: [
+        'element-source',
+        'vite',
+        'vite-plugin-vue-inspector',
+        'node:fs',
+        'node:path',
+        'node:url',
+      ],
       output: {
         exports: 'named',
       },

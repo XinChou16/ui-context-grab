@@ -18,6 +18,15 @@ interface CollectedContext {
   componentName: string | null
   componentStack: string[]
   file: string | null
+  lineNumber: number | null
+  columnNumber: number | null
+  sourceLocation: string | null
+  sourceStack: Array<{
+    filePath: string
+    lineNumber: number | null
+    columnNumber: number | null
+    componentName: string | null
+  }>
   tag: string
   id: string | null
   classList: string[]
@@ -172,12 +181,16 @@ function toCssRuleMatches(element: Element): CssRuleMatch[] {
   return matches
 }
 
-function toCollectedContext(element: Element): CollectedContext {
-  const componentContext = getVueComponentContext(element)
+async function toCollectedContext(element: Element): Promise<CollectedContext> {
+  const componentContext = await getVueComponentContext(element)
   return {
     componentName: componentContext.componentName,
     componentStack: componentContext.componentStack,
     file: componentContext.file,
+    lineNumber: componentContext.lineNumber,
+    columnNumber: componentContext.columnNumber,
+    sourceLocation: componentContext.sourceLocation,
+    sourceStack: componentContext.sourceStack,
     tag: element.tagName.toLowerCase(),
     id: element.id || null,
     classList: toClassList(element),
@@ -211,7 +224,7 @@ function handleMouseEnter(event: Event): void {
   highlightElement(target)
 }
 
-function handleClick(event: MouseEvent): void {
+async function handleClick(event: MouseEvent): Promise<void> {
   if (!active) {
     return
   }
@@ -235,7 +248,7 @@ function handleClick(event: MouseEvent): void {
   }
 
   highlightElement(target)
-  const context = toCollectedContext(target)
+  const context = await toCollectedContext(target)
   console.log(LOG_PREFIX, context)
 
   const clearComment = lastSelectedElement !== target
@@ -243,6 +256,9 @@ function handleClick(event: MouseEvent): void {
     componentName: context.componentName,
     componentStack: context.componentStack,
     file: context.file,
+    lineNumber: context.lineNumber,
+    columnNumber: context.columnNumber,
+    sourceLocation: context.sourceLocation,
     selectorPath: context.selectorPath,
     domPath: context.domPath,
   }, clearComment)
@@ -274,7 +290,7 @@ function setActive(nextActive: boolean): void {
 
   if (active) {
     document.addEventListener('mouseenter', handleMouseEnter, { capture: true, passive: true })
-    document.addEventListener('click', handleClick, { capture: true, passive: true })
+    document.addEventListener('click', handleClick, { capture: true })
     document.addEventListener('mouseleave', handleMouseLeave, { passive: true })
     return
   }
