@@ -30,7 +30,7 @@ export default defineConfig({
         exports: 'named',
       },
     },
-    sourcemap: true,
+    sourcemap: false,
     target: 'es2020',
   },
 })

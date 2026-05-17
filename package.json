@@ -1,8 +1,29 @@
 {
   "name": "ui-context-grab",
-  "private": true,
-  "version": "0.0.0",
+  "version": "0.1.0-alpha.0",
+  "description": "A Vite dev plugin for grabbing DOM, Vue component, source, and style context from the page.",
   "type": "module",
+  "license": "MIT",
+  "author": "Coool Chou <cooolchou@163.com>",
+  "homepage": "https://github.com/XinChou16/ui-context-grab#readme",
+  "bugs": {
+    "url": "https://github.com/XinChou16/ui-context-grab/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/XinChou16/ui-context-grab.git"
+  },
+  "keywords": [
+    "vite",
+    "vite-plugin",
+    "vue",
+    "devtools",
+    "inspector",
+    "debugging",
+    "dom",
+    "context"
+  ],
+  "sideEffects": false,
   "exports": {
     ".": {
       "types": "./dist/lib/index.d.ts",
@@ -31,12 +52,20 @@
     "build:demo": "vue-tsc -b && vite build",
     "build:types": "tsc -p tsconfig.lib.json",
     "build:lib": "vite build --config vite.lib.config.ts && pnpm build:types",
-    "preview": "vite preview"
+    "preview": "vite preview --outDir dist-demo"
   },
   "dependencies": {
-    "element-source": "^0.0.5",
+    "element-source": "^0.0.5"
+  },
+  "peerDependencies": {
+    "vite": "^5.0.0 || ^6.0.0 || ^7.0.0 || ^8.0.0",
     "vite-plugin-vue-inspector": "^5.3.2",
-    "vue": "^3.5.32"
+    "vue": "^3.0.0"
+  },
+  "peerDependenciesMeta": {
+    "vue": {
+      "optional": true
+    }
   },
   "devDependencies": {
     "@types/node": "^24.12.2",
@@ -44,7 +73,9 @@
     "@vue/tsconfig": "^0.9.1",
     "typescript": "~6.0.2",
     "vite": "^8.0.4",
+    "vite-plugin-vue-inspector": "^5.3.2",
     "vite-plugin-mkcert": "^2.0.0",
+    "vue": "^3.5.32",
     "vue-tsc": "^3.2.6"
   },
   "packageManager": "pnpm@8.15.0+sha512.ea45517d5285d123eac02c3793505fa1fd6da90a2fc60d1e8d9e0c1e9292886ecfaff513f062b9d1cc8021bb8615033b1ac5bea3b2ee3fc165a6d7034bbe6b03"

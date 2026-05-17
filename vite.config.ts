@@ -5,9 +5,12 @@ import uiContextGrab from './src/lib'
 
 // https://vite.dev/config/
 export default defineConfig({
-  plugins: [vue(), 
+  build: {
+    outDir: 'dist-demo',
+  },
+  plugins: [
+    vue(),
     mkcert(),
-    // 
-    uiContextGrab()
-],
+    uiContextGrab(),
+  ],
 })

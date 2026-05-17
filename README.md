@@ -117,6 +117,8 @@ pnpm build
 pnpm build:demo
 ```
 
+demo 构建产物会输出到 `dist-demo/`，避免覆盖用于 npm 发布的 `dist/` 库产物。
+
 预览 demo 构建结果：
 
 ```bash
@@ -175,10 +177,15 @@ uiContextGrab({ enabled: true })
 
 ### 安装
 
-发布到 npm 或私有源后：
-
 ```bash
 pnpm add -D ui-context-grab
+```
+
+也可以使用 npm 或 yarn：
+
+```bash
+npm install -D ui-context-grab
+yarn add -D ui-context-grab
 ```
 
 本地联调时：
@@ -203,7 +210,19 @@ export default defineConfig({
 })
 ```
 
-也可以通过子路径导入客户端入口：
+### 配置项
+
+```ts
+uiContextGrab({
+  enabled: true,
+  vueInspector: true,
+})
+```
+
+- `enabled`: 是否注入客户端脚本，默认 `true`。
+- `vueInspector`: 是否启用内置 `vite-plugin-vue-inspector` source 标记，默认启用。传 `false` 可关闭，也可以传入 `vite-plugin-vue-inspector` 的部分配置。
+
+也可以通过子路径导入客户端入口，用于手动初始化或自定义注入场景：
 
 ```ts
 import { init } from 'ui-context-grab/client'
@@ -223,6 +242,36 @@ import { init } from 'ui-context-grab/client'
 
 - `ui-context-grab`
 - `ui-context-grab/client`
+
+## 发布前检查
+
+发布到 npm 前建议依次执行：
+
+```bash
+pnpm install
+pnpm build
+pnpm build:demo
+npm pack --dry-run
+```
+
+如果本机 npm cache 有权限问题，可以临时指定 cache 目录：
+
+```bash
+npm_config_cache=/private/tmp/npm-cache npm pack --dry-run
+```
+
+首次公开发布：
+
+```bash
+npm login
+npm publish --access public
+```
+
+发布后可通过以下命令确认 registry 信息：
+
+```bash
+npm view ui-context-grab
+```
 
 ## 已知限制
 
