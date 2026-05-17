@@ -26,6 +26,7 @@
   },
   "scripts": {
     "dev": "vite --host",
+    "example:vue": "pnpm build:lib && vite --host --config examples/vue-vite/vite.config.ts --configLoader native",
     "build": "pnpm build:lib",
     "build:demo": "vue-tsc -b && vite build",
     "build:types": "tsc -p tsconfig.lib.json",

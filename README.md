@@ -116,6 +116,32 @@ pnpm build:demo
 pnpm preview
 ```
 
+## Examples
+
+仓库提供了一个 Vue + Vite 接入示例：
+
+```bash
+pnpm example:vue
+```
+
+示例位于 `examples/vue-vite`。它在代码中使用真实包名导入插件：
+
+```ts
+import uiContextGrab from 'ui-context-grab'
+```
+
+为了让示例配置可以直接复制到外部项目，`vite.config.ts` 保留真实包名导入。示例中同时展示了通过 `resolve.alias` 将 `ui-context-grab` 指向本地源码的写法：
+
+```ts
+resolve: {
+  alias: {
+    'ui-context-grab': fileURLToPath(new URL('../../src/lib/index.ts', import.meta.url)),
+  },
+}
+```
+
+由于 Vite 的 `resolve.alias` 在配置文件加载完成后才生效，仓库内的 `pnpm example:vue` 会先构建本地包再启动示例。复制到外部项目时，保留 `import uiContextGrab from 'ui-context-grab'`，安装包后移除这段本地源码 alias，并使用普通的 `vite` 启动命令即可。
+
 ## 在当前项目中接入
 
 在 `vite.config.ts` 中注册插件：

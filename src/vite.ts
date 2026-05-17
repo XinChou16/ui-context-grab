@@ -48,3 +48,5 @@ export function uiContextGrab(options: UiContextGrabOptions = {}): Plugin {
 export function visualPrompt(options: UiContextGrabOptions = {}): Plugin {
   return uiContextGrab(options)
 }
+
+export default uiContextGrab
