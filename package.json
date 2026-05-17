@@ -52,7 +52,12 @@
     "build:demo": "vue-tsc -b && vite build",
     "build:types": "tsc -p tsconfig.lib.json",
     "build:lib": "vite build --config vite.lib.config.ts && pnpm build:types",
-    "preview": "vite preview --outDir dist-demo"
+    "check:registry": "node scripts/check-npm-registry.mjs",
+    "pack:dry": "npm pack --dry-run",
+    "prepublishOnly": "pnpm check:registry && pnpm build",
+    "preview": "vite preview --outDir dist-demo",
+    "publish:alpha": "bash scripts/publish.sh alpha",
+    "publish:latest": "bash scripts/publish.sh latest"
   },
   "dependencies": {
     "element-source": "^0.0.5"

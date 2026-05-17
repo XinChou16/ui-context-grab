@@ -249,9 +249,10 @@ import { init } from 'ui-context-grab/client'
 
 ```bash
 pnpm install
+pnpm check:registry
 pnpm build
 pnpm build:demo
-npm pack --dry-run
+pnpm pack:dry
 ```
 
 如果本机 npm cache 有权限问题，可以临时指定 cache 目录：
@@ -260,12 +261,16 @@ npm pack --dry-run
 npm_config_cache=/private/tmp/npm-cache npm pack --dry-run
 ```
 
+`pnpm check:registry` 会要求当前 npm registry 是官方源 `https://registry.npmjs.org/`，避免误发到镜像或私有源。
+
 首次公开发布：
 
 ```bash
 npm login
-npm publish --access public
+pnpm publish:alpha
 ```
+
+发布 alpha 版本使用 `pnpm publish:alpha`，会通过 `scripts/publish.sh alpha` 检查官方 registry 和干净工作区，然后执行 `npm version prerelease --preid alpha`，再发布到 npm 的 `alpha` dist-tag。发布正式版本使用 `pnpm publish:latest`，会执行同样检查，然后 `npm version patch` 并发布到默认 `latest` dist-tag。
 
 发布后可通过以下命令确认 registry 信息：
 
